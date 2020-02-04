@@ -1,8 +1,23 @@
+// 'uT8GmOJ0i3kW8R6C'
+
 var createError = require("http-errors");
+var cookieSession = require("cookie-session");
 var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+var config = require("./config");
+var mongoose = require("mongoose");
+
+mongoose.connect(config.db, {
+  useNewUrlParser: true
+});
+
+var db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", function() {
+  console.log("db connect");
+});
 
 var indexRouter = require("./routes/index");
 var newsRouter = require("./routes/news");
@@ -14,6 +29,14 @@ var app = express();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
+
+app.use(
+  cookieSession({
+    name: "session",
+    keys: config.keySession,
+    maxAge: config.maxAgeSession
+  })
+);
 
 app.use(logger("dev"));
 app.use(express.json());
